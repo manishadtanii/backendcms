@@ -14,14 +14,37 @@ import contactRouter from './src/routers/contactRouter.js';
 import adminUsersRouter from './src/routers/adminUsersRouter.js';
 const port = process.env.PORT || 3000;
 
-// CORS Configuration
-const corsOptions = {
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://varallocms.vercel.app'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
+// CORS Configuration (FIXED)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://varallocms.vercel.app'
+];
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
+// IMPORTANT: handle preflight
+app.options('*', cors());
+
+
+
+
 app.use(helmet({
   crossOriginResourcePolicy: false,
 }));
